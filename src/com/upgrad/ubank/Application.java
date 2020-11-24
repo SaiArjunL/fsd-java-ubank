@@ -1,5 +1,7 @@
 package com.upgrad.ubank;
 
+import com.upgrad.ubank.dtos.Account;
+import com.upgrad.ubank.dtos.Transaction;
 import com.upgrad.ubank.services.*;
 
 import java.util.Scanner;
@@ -131,7 +133,7 @@ public class Application {
         System.out.println("*******Account*******");
         System.out.println("*********************");
 
-        System.out.println("Get the account corresponding to Account No: " + loggedInAccountNo);
+        System.out.println("Get the account corresponding to Account No: " + accountService.getAccount(loggedInAccountNo));
     }
 
     private void deposit () {
@@ -148,6 +150,14 @@ public class Application {
         int amount = Integer.parseInt(scan.nextLine());
 
         System.out.println("Deposit " + amount + " rs to account " + loggedInAccountNo);
+
+        Account account = accountService.deposit(loggedInAccountNo,amount);
+
+        if (account == null){
+            System.out.println("Could not deposit into account.");
+        }
+        else
+            System.out.println("Money successfully deposited into account.");
     }
 
     private void withdraw () {
@@ -166,7 +176,8 @@ public class Application {
         Account account = accountService.withdraw(loggedInAccountNo, amount);
         if (account == null) {
             System.out.println("Could not withdraw from account.");
-        } else {
+        }
+        else {
             System.out.println("Money successfully withdrawn from account.");
         }
     }
@@ -182,11 +193,21 @@ public class Application {
         System.out.println("*********************");
 
         Transaction[] transactions = transactionService.getTransactions(loggedInAccountNo);
-        if (transactions == null) {
+
+        if (transactions == null){
             System.out.println("This feature is not available for mobile");
-        } else {
-            System.out.println("Print account statement for account " + loggedInAccountNo);
         }
+        else {
+            System.out.println("No transaction exists for you.");
+
+        }
+
+        assert transactions != null;
+        for (Transaction transaction: transactions){
+
+            System.out.println(transaction.toString());
+        }
+
     }
 
     private void logout () {
@@ -200,8 +221,8 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        AccountService accountService = new AccountServiceImpl();
-        TransactionService transactionService = new TransactionServiceImplMobile();
+        TransactionService transactionService = new TransactionServiceImpl();
+        AccountService accountService = new AccountServiceImpl(transactionService);
         Application application = new Application(accountService, transactionService);
         application.start();
     }
